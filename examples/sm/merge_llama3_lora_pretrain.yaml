@@ -7,7 +7,7 @@ adapter_name_or_path: saves/llama3-8b/lora/pretrain
 finetuning_type: lora
 
 # export
-export_dir: saves/llama3/pretrain
+export_dir: saves/llama3-8b/pretrain
 export_size: 2
 export_device: cpu
 export_legacy_format: false
