@@ -437,5 +437,24 @@
       "prompt": "content"
     },
     "folder": "python"
+  },
+  "sm_artile": {
+    "hf_hub_url": "ytcheng/sm_article",
+    "columns":{
+      "prompt":"text"
+    }
+  },
+  "sm_question":{
+    "hf_hub_url": "ytcheng/sm_kf_chat_message",
+    "columns":{
+      "messages":"messages"
+    },
+    "tags": {
+      "role_tag": "role",
+      "content_tag": "content",
+      "user_tag": "user",
+      "assistant_tag": "assistant",
+      "system_tag": "system"
+    }
   }
 }
