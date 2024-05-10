@@ -7,8 +7,8 @@ adapter_name_or_path: saves/llama3-8b/lora/pretrain
 finetuning_type: lora
 
 # export
-export_dir: models/llama3_lora_pretrain
+export_dir: saves/llama3/pretrain
 export_size: 2
 export_device: cpu
 export_legacy_format: false
-export_hub_model_id: ytcheng/llama-3-86-pretrain
+export_hub_model_id: ytcheng/llama-3-8B-pretrain
