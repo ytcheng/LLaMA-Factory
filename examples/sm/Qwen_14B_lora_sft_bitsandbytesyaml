@@ -23,7 +23,7 @@ preprocessing_num_workers: 16
 # output
 output_dir: saves/Qwen-14B/lora/sft
 logging_steps: 10
-save_steps: 500
+save_steps: 100
 plot_loss: true
 overwrite_output_dir: true
 push_to_hub: true
@@ -41,4 +41,4 @@ fp16: true
 # eval
 per_device_eval_batch_size: 1
 evaluation_strategy: steps
-eval_steps: 200
+eval_steps: 100
