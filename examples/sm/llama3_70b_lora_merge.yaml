@@ -1,0 +1,14 @@
+# Note: DO NOT use quantized model or quantization_bit when merging lora adapters
+
+# model
+model_name_or_path: meta-llama/Meta-Llama-3-70B-Instruct
+adapter_name_or_path: saves/llama3-70b/lora/pretrain
+template: llama3
+finetuning_type: lora
+
+# export
+export_dir: saves/llama3-70b/pretrain
+export_size: 5
+export_device: cpu
+export_legacy_format: false
+export_hub_model_id: ytcheng/llama-3-70b-pretrain
