@@ -8,7 +8,7 @@ finetuning_type: lora
 
 # export
 export_dir: saves/Qwen-14B/pretrain
-export_size: 5
+export_size: 2
 export_device: cpu
 export_legacy_format: false
 export_hub_model_id: ytcheng/Qwen-14B-pretrain
