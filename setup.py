@@ -38,7 +38,7 @@ extra_require = {
 
 def main():
     setup(
-        name="小蜀",
+        name="小狐狸",
         version=get_version(),
         author="方趣网络",
         author_email="hiyouga" "@" "buaa.edu.cn",
