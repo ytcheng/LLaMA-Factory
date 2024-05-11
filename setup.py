@@ -38,9 +38,9 @@ extra_require = {
 
 def main():
     setup(
-        name="llmtuner",
+        name="小蜀",
         version=get_version(),
-        author="hiyouga",
+        author="方趣网络",
         author_email="hiyouga" "@" "buaa.edu.cn",
         description="Easy-to-use LLM fine-tuning framework",
         long_description=open("README.md", "r", encoding="utf-8").read(),

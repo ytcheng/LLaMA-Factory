@@ -12,7 +12,7 @@ lora_target: c_attn
 ddp_timeout: 180000000
 
 # dataset
-dataset: sm_question
+dataset: sm_question, identity
 template: qwen
 cutoff_len: 1024
 max_samples: 100000
