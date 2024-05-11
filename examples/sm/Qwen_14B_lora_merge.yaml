@@ -3,7 +3,7 @@
 # model
 model_name_or_path: Qwen/Qwen-14B
 adapter_name_or_path: ytcheng/Qwen-14B-lora-pretrain
-template: llama3
+template: qwen
 finetuning_type: lora
 
 # export
