@@ -6,7 +6,7 @@ quantization_bit: 4
 stage: pt
 do_train: true
 finetuning_type: lora
-lora_target: c_attn
+lora_target: q_proj,v_proj
 
 # ddp
 ddp_timeout: 180000000
