@@ -30,18 +30,23 @@ def augment(content):
         add_generation_prompt=True
     )
     model_inputs = tokenizer([text], return_tensors="pt").to(device)
+    try:
+        generated_ids = model.generate(
+            model_inputs.input_ids,
+            max_new_tokens=2048
+        )
+        generated_ids = [
+            output_ids[len(input_ids):] for input_ids, output_ids in zip(model_inputs.input_ids, generated_ids)
+        ]
 
-    generated_ids = model.generate(
-        model_inputs.input_ids,
-        max_new_tokens=2048
-    )
-    generated_ids = [
-        output_ids[len(input_ids):] for input_ids, output_ids in zip(model_inputs.input_ids, generated_ids)
-    ]
-
-    response = tokenizer.batch_decode(generated_ids, skip_special_tokens=True)[0]
+        response = tokenizer.batch_decode(generated_ids, skip_special_tokens=True)[0]
+    except Exception as e:
+        print("An error occurred:", e)
+        response = ""
+    
     torch.cuda.empty_cache()
     get_gpu_memory_usage()
+    print("response:")
     print(response)
     return response
 
