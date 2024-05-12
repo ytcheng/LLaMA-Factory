@@ -7,6 +7,8 @@ import time
 # def augment(content):
 #     # count = count + 1
 #     return content
+
+
 model = AutoModelForCausalLM.from_pretrained(
     "Qwen/Qwen1.5-32B-Chat-GPTQ-Int4",
     torch_dtype="auto",
@@ -16,6 +18,7 @@ tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen1.5-32B-Chat-GPTQ-Int4")
 prompt = "用通顺流畅的语言重新表达下文内容。务必不要用类似\"xxx: xxxxxxx\"或”xxx: \n\" 这种句式。要覆盖原文的全部内容，不要遗漏。\n\n"
 
 def augment(content):
+    device = "cuda" # the device to load the model onto
     messages = [
         {"role": "system", "content": "You are a helpful assistant."},
         {"role": "user", "content": prompt + content}
