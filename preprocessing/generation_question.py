@@ -100,7 +100,7 @@ print(strategy_dataset)
 # print(strategy_dataset["train"][0])
 
 dataset = concatenate_datasets([strategy_dataset["train"], article_dataset["train"]])
-dataset = dataset.select(range(5))
+# dataset = dataset.select(range(5))
 # for i in range(1, 6):
 dataset = dataset.map(gengrate)
     # print(dataset[0])
