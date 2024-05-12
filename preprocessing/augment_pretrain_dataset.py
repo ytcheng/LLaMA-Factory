@@ -4,42 +4,42 @@ from bs4 import BeautifulSoup
 import re
 import time
 # count = 0
-def augment(content):
-    # count = count + 1
-    return content
-# model = AutoModelForCausalLM.from_pretrained(
-#     "Qwen/Qwen1.5-32B-Chat-GPTQ-Int4",
-#     torch_dtype="auto",
-#     device_map="auto"
-# )
-# tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen1.5-32B-Chat-GPTQ-Int4")
-# prompt = "用通顺流畅的语言重新表达下文内容。务必不要用类似\"xxx: xxxxxxx\"或”xxx: \n\" 这种句式。要覆盖原文的全部内容，不要遗漏。\n\n"
-
 # def augment(content):
-#     messages = [
-#         {"role": "system", "content": "You are a helpful assistant."},
-#         {"role": "user", "content": prompt + content}
-#     ]
-#     text = tokenizer.apply_chat_template(
-#         messages,
-#         tokenize=False,
-#         add_generation_prompt=True
-#     )
-#     model_inputs = tokenizer([text], return_tensors="pt").to(device)
+#     # count = count + 1
+#     return content
+model = AutoModelForCausalLM.from_pretrained(
+    "Qwen/Qwen1.5-32B-Chat-GPTQ-Int4",
+    torch_dtype="auto",
+    device_map="auto"
+)
+tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen1.5-32B-Chat-GPTQ-Int4")
+prompt = "用通顺流畅的语言重新表达下文内容。务必不要用类似\"xxx: xxxxxxx\"或”xxx: \n\" 这种句式。要覆盖原文的全部内容，不要遗漏。\n\n"
 
-#     generated_ids = model.generate(
-#         model_inputs.input_ids,
-#         max_new_tokens=512
-#     )
-#     generated_ids = [
-#         output_ids[len(input_ids):] for input_ids, output_ids in zip(model_inputs.input_ids, generated_ids)
-#     ]
+def augment(content):
+    messages = [
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": prompt + content}
+    ]
+    text = tokenizer.apply_chat_template(
+        messages,
+        tokenize=False,
+        add_generation_prompt=True
+    )
+    model_inputs = tokenizer([text], return_tensors="pt").to(device)
 
-#     response = tokenizer.batch_decode(generated_ids, skip_special_tokens=True)[0]
-#     torch.cuda.empty_cache()
-#     get_gpu_memory_usage()
-#     print(response)
-#     return response
+    generated_ids = model.generate(
+        model_inputs.input_ids,
+        max_new_tokens=512
+    )
+    generated_ids = [
+        output_ids[len(input_ids):] for input_ids, output_ids in zip(model_inputs.input_ids, generated_ids)
+    ]
+
+    response = tokenizer.batch_decode(generated_ids, skip_special_tokens=True)[0]
+    torch.cuda.empty_cache()
+    get_gpu_memory_usage()
+    print(response)
+    return response
 
 def get_gpu_memory_usage():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
