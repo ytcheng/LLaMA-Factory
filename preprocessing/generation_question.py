@@ -1,5 +1,5 @@
 from datasets import load_dataset, concatenate_datasets
-from transformers import AutoTokenizer, AutoModelForCausalLM,BitsAndBytesConfig
+from transformers import AutoTokenizer, AutoModelForCausalLM
 import torch
 from tqdm import tqdm
 import json
@@ -28,10 +28,11 @@ def gengrate(sample):
                 {"role": "user", "content": prompt + content}
             ]
             for question in questions:
-                messages.expend([
+                messages.extend([
                     {"role": "assistant", "content": question},
                     {"role": "user", "content": "再生成一些"}
                 ])
+            print(messages)
             text = tokenizer.apply_chat_template(
                 messages,
                 tokenize=False,
@@ -99,7 +100,7 @@ print(strategy_dataset)
 # print(strategy_dataset["train"][0])
 
 dataset = concatenate_datasets([strategy_dataset["train"], article_dataset["train"]])
-
+dataset = dataset.select(range(5))
 # for i in range(1, 6):
 dataset = dataset.map(gengrate)
     # print(dataset[0])
@@ -108,4 +109,5 @@ print(dataset[0])
 
 generate_datasets = Dataset.from_list(dataset)
 datasets_formatted_data = DatasetDict({"train":  generate_datasets})
+datasets_formatted_data.save_to_disk("sm_question3")
 datasets_formatted_data.push_to_hub("ytcheng/sm_question3")
