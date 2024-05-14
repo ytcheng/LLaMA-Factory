@@ -21,7 +21,7 @@ def gengrate(sample):
     questions = []
     try:
         for idx in range(5):
-            content = sample["content"]
+            content = "标题:" + sample["title"] + "\n\n" +sample["content"]
             device = "cuda" # the device to load the model onto
             messages = [
                 {"role": "system", "content": "You are a helpful assistant."},
