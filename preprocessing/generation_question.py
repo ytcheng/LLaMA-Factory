@@ -17,46 +17,6 @@ model = AutoModelForCausalLM.from_pretrained(
 tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen1.5-32B-Chat-GPTQ-Int4")
 prompt = "从以下内容中，提取尽可能多的问题和答案，尽量覆盖所有的内容，问题和答案要包含必要的背景信息。以json格式返回，json格式为[{\"question\":\"xxxx\",\"answer\":\"xxx\"},xxxx]。\n\n"
 
-def gengrate(sample):
-    questions = []
-    try:
-        for idx in range(5):
-            content = "标题:" + sample["title"] + "\n\n" +sample["content"]
-            device = "cuda" # the device to load the model onto
-            messages = [
-                {"role": "system", "content": "You are a helpful assistant."},
-                {"role": "user", "content": prompt + content}
-            ]
-            for question in questions:
-                messages.extend([
-                    {"role": "assistant", "content": question},
-                    {"role": "user", "content": "再生成一些"}
-                ])
-            print(messages)
-            text = tokenizer.apply_chat_template(
-                messages,
-                tokenize=False,
-                add_generation_prompt=True
-            )
-            model_inputs = tokenizer([text], return_tensors="pt").to(device)
-
-            generated_ids = model.generate(
-                model_inputs.input_ids,
-                max_new_tokens=2048
-            )
-            generated_ids = [
-                output_ids[len(input_ids):] for input_ids, output_ids in zip(model_inputs.input_ids, generated_ids)
-            ]
-
-            response = tokenizer.batch_decode(generated_ids, skip_special_tokens=True)[0]
-            questions.append(response)
-            torch.cuda.empty_cache()
-            get_gpu_memory_usage()
-    except Exception as e:
-        print("An error occurred:", e)
-    print(questions)
-    sample["questions"] = questions
-    return sample
 
 
 def get_gpu_memory_usage():
@@ -102,7 +62,7 @@ print(strategy_dataset)
 dataset = concatenate_datasets([strategy_dataset["train"], article_dataset["train"]])
 # dataset = dataset.select(range(5))
 # for i in range(1, 6):
-dataset = dataset.map(gengrate)
+dataset = dataset.map(gengrate, with_indices=True)
     # print(dataset[0])
 print(dataset)
 print(dataset[0])
@@ -111,3 +71,51 @@ generate_datasets = Dataset.from_list(dataset)
 datasets_formatted_data = DatasetDict({"train":  generate_datasets})
 datasets_formatted_data.save_to_disk("sm_question3")
 datasets_formatted_data.push_to_hub("ytcheng/sm_question3")
+
+
+def gengrate(sample, index):
+    questions = []
+    try:
+        for idx in range(5):
+            content = "标题:" + sample["title"] + "\n\n" +sample["content"]
+            device = "cuda" # the device to load the model onto
+            messages = [
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": prompt + content}
+            ]
+            for question in questions:
+                messages.extend([
+                    {"role": "assistant", "content": question},
+                    {"role": "user", "content": "再生成一些"}
+                ])
+            print(messages)
+            text = tokenizer.apply_chat_template(
+                messages,
+                tokenize=False,
+                add_generation_prompt=True
+            )
+            model_inputs = tokenizer([text], return_tensors="pt").to(device)
+
+            generated_ids = model.generate(
+                model_inputs.input_ids,
+                max_new_tokens=2048
+            )
+            generated_ids = [
+                output_ids[len(input_ids):] for input_ids, output_ids in zip(model_inputs.input_ids, generated_ids)
+            ]
+
+            response = tokenizer.batch_decode(generated_ids, skip_special_tokens=True)[0]
+            questions.append(response)
+            torch.cuda.empty_cache()
+            get_gpu_memory_usage()
+    except Exception as e:
+        print("An error occurred:", e)
+    print(questions)
+    sample["questions"] = questions
+
+    if index % 10 == 0:
+        # 保存处理后的数据集
+        dataset.save_to_disk(f"sm_question_{index}")
+
+
+    return sample
