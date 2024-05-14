@@ -60,17 +60,7 @@ print(strategy_dataset)
 # print(strategy_dataset["train"][0])
 
 dataset = concatenate_datasets([strategy_dataset["train"], article_dataset["train"]])
-# dataset = dataset.select(range(5))
-# for i in range(1, 6):
-dataset = dataset.map(gengrate, with_indices=True)
-    # print(dataset[0])
-print(dataset)
-print(dataset[0])
 
-generate_datasets = Dataset.from_list(dataset)
-datasets_formatted_data = DatasetDict({"train":  generate_datasets})
-datasets_formatted_data.save_to_disk("sm_question3")
-datasets_formatted_data.push_to_hub("ytcheng/sm_question3")
 
 
 def gengrate(sample, index):
@@ -119,3 +109,15 @@ def gengrate(sample, index):
 
 
     return sample
+    
+# dataset = dataset.select(range(5))
+# for i in range(1, 6):
+dataset = dataset.map(gengrate, with_indices=True)
+    # print(dataset[0])
+print(dataset)
+print(dataset[0])
+
+generate_datasets = Dataset.from_list(dataset)
+datasets_formatted_data = DatasetDict({"train":  generate_datasets})
+datasets_formatted_data.save_to_disk("sm_question3")
+datasets_formatted_data.push_to_hub("ytcheng/sm_question3")
