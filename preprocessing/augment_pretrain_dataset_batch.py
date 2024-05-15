@@ -177,7 +177,7 @@ article_dataset = load_dataset("ytcheng/sm_news")
 # article_dataset = DatasetDict({"train":  article_dataset})
 
 article_dataset = article_dataset.map(lambda example: {"clean_text": remove_html_tags(example["content"])})
-article_dataset = article_dataset.map(news_augment, batched=True, batch_size=30)
+article_dataset = article_dataset.map(news_augment, batched=True, batch_size=20)
 article_dataset = article_dataset.map(news_stategy_augment)
 print(article_dataset)
 print(article_dataset["train"][0])
