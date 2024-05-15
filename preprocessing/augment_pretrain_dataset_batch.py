@@ -36,10 +36,11 @@ def augment(contents):
             add_generation_prompt=True
         )
         texts.append(text)
+    tokenizer.pad_token = tokenizer.eos_token
     model_inputs = tokenizer(texts, padding=True, return_tensors="pt").to(device)
     try:
         generated_ids = model.generate(
-            model_inputs.input_ids,
+            **model_inputs,
             max_new_tokens=2048
         )
         generated_ids = [
@@ -172,13 +173,13 @@ article_dataset = load_dataset("ytcheng/sm_news")
 # article_dataset = article_dataset.filter(lambda x: x["content"]!="").filter(lambda x: x["id"]>1391 and x["id"] < 1401)
 # article_dataset = article_dataset['train'].select(range(10))
 # article_dataset = DatasetDict({"train":  article_dataset})
-article_dataset = article_dataset['train'].select(range(40))
-article_dataset = DatasetDict({"train":  article_dataset})
+# article_dataset = article_dataset['train'].select(range(40))
+# article_dataset = DatasetDict({"train":  article_dataset})
 
 article_dataset = article_dataset.map(lambda example: {"clean_text": remove_html_tags(example["content"])})
-article_dataset = article_dataset.map(news_augment, batched=True, batch_size=20)
+article_dataset = article_dataset.map(news_augment, batched=True, batch_size=30)
 article_dataset = article_dataset.map(news_stategy_augment)
 print(article_dataset)
 print(article_dataset["train"][0])
 article_dataset.save_to_disk("sm_news")
-# article_dataset.push_to_hub("ytcheng/sm_news")
+article_dataset.push_to_hub("ytcheng/sm_news")
