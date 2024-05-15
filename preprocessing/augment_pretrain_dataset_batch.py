@@ -112,7 +112,7 @@ def strategy_augment(example):
     texts = []
     for i in range(times):
         texts.append(example["clean_text"])
-        augmented_contents = augment(texts)
+    augmented_contents = augment(texts)
     example["augmented_contents"] = augmented_contents
     return example
 strategy_dataset = load_dataset("ytcheng/sm_strategy")
