@@ -116,14 +116,14 @@ def strategy_augment(example):
     example["augmented_contents"] = augmented_contents
     return example
 strategy_dataset = load_dataset("ytcheng/sm_strategy")
-strategy_dataset = strategy_dataset['train'].select(range(2))
-strategy_dataset = DatasetDict({"train":  strategy_dataset})
+# strategy_dataset = strategy_dataset['train'].select(range(2))
+# strategy_dataset = DatasetDict({"train":  strategy_dataset})
 strategy_dataset = strategy_dataset.map(lambda example: {"clean_text": remove_html_tags(example["content"])})
 strategy_dataset = strategy_dataset.map(strategy_augment)
 print(strategy_dataset)
 print((json.dumps(strategy_dataset["train"][0], ensure_ascii=False)))
 strategy_dataset.save_to_disk("sm_strategy")
-# strategy_dataset.push_to_hub("ytcheng/sm_strategy")
+strategy_dataset.push_to_hub("ytcheng/sm_strategy")
 
 # 处理新闻文章
 def news_augment(examples):
