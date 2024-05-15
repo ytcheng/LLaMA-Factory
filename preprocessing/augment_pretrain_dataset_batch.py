@@ -115,15 +115,15 @@ def strategy_augment(example):
     augmented_contents = augment(texts)
     example["augmented_contents"] = augmented_contents
     return example
-strategy_dataset = load_dataset("ytcheng/sm_strategy")
-# strategy_dataset = strategy_dataset['train'].select(range(2))
-# strategy_dataset = DatasetDict({"train":  strategy_dataset})
-strategy_dataset = strategy_dataset.map(lambda example: {"clean_text": remove_html_tags(example["content"])})
-strategy_dataset = strategy_dataset.map(strategy_augment)
-print(strategy_dataset)
-print((json.dumps(strategy_dataset["train"][0], ensure_ascii=False)))
-strategy_dataset.save_to_disk("sm_strategy")
-strategy_dataset.push_to_hub("ytcheng/sm_strategy")
+# strategy_dataset = load_dataset("ytcheng/sm_strategy")
+# # strategy_dataset = strategy_dataset['train'].select(range(2))
+# # strategy_dataset = DatasetDict({"train":  strategy_dataset})
+# strategy_dataset = strategy_dataset.map(lambda example: {"clean_text": remove_html_tags(example["content"])})
+# strategy_dataset = strategy_dataset.map(strategy_augment)
+# print(strategy_dataset)
+# print((json.dumps(strategy_dataset["train"][0], ensure_ascii=False)))
+# strategy_dataset.save_to_disk("sm_strategy")
+# strategy_dataset.push_to_hub("ytcheng/sm_strategy")
 
 # 处理新闻文章
 def news_augment(examples):
@@ -164,19 +164,21 @@ def news_stategy_augment(example):
     augmented_contents = []
     for i in range(times):
         texts.append(example["clean_text"])
-        augmented_contents = augment(texts)
+    augmented_contents = augment(texts)
     example["augmented_contents"] = augmented_contents
     return example
 
-# article_dataset = load_dataset("ytcheng/sm_news")
-# # article_dataset = article_dataset.filter(lambda x: x["content"]!="").filter(lambda x: x["id"]>1391 and x["id"] < 1401)
+article_dataset = load_dataset("ytcheng/sm_news")
+# article_dataset = article_dataset.filter(lambda x: x["content"]!="").filter(lambda x: x["id"]>1391 and x["id"] < 1401)
 # article_dataset = article_dataset['train'].select(range(10))
-# article_dataset = DatasetDict({"train":  article_dataset})
+article_dataset = article_dataset['train'].select(range(40))
+article_dataset = DatasetDict({"train":  article_dataset})
+article_dataset = DatasetDict({"train":  article_dataset})
 
-# article_dataset = article_dataset.map(lambda example: {"clean_text": remove_html_tags(example["content"])})
-# article_dataset = article_dataset.map(news_augment, batched=True, batch_size=5)
-# article_dataset = article_dataset.map(news_stategy_augment)
-# print(article_dataset)
-# print(article_dataset["train"][0])
-# article_dataset.save_to_disk("sm_news")
+article_dataset = article_dataset.map(lambda example: {"clean_text": remove_html_tags(example["content"])})
+article_dataset = article_dataset.map(news_augment, batched=True, batch_size=20)
+article_dataset = article_dataset.map(news_stategy_augment)
+print(article_dataset)
+print(article_dataset["train"][0])
+article_dataset.save_to_disk("sm_news")
 # article_dataset.push_to_hub("ytcheng/sm_news")
