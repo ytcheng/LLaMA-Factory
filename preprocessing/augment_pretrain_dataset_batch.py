@@ -171,8 +171,8 @@ def news_stategy_augment(example):
 article_dataset = load_dataset("ytcheng/sm_news")
 # article_dataset = article_dataset.filter(lambda x: x["content"]!="").filter(lambda x: x["id"]>1391 and x["id"] < 1401)
 # article_dataset = article_dataset['train'].select(range(10))
+# article_dataset = DatasetDict({"train":  article_dataset})
 article_dataset = article_dataset['train'].select(range(40))
-article_dataset = DatasetDict({"train":  article_dataset})
 article_dataset = DatasetDict({"train":  article_dataset})
 
 article_dataset = article_dataset.map(lambda example: {"clean_text": remove_html_tags(example["content"])})
