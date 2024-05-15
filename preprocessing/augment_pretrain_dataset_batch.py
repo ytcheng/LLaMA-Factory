@@ -128,9 +128,9 @@ def strategy_augment(example):
 
 # 处理新闻文章
 def news_augment(examples):
-    print("before new augment:")
-    print(json.dumps(examples["clean_text"], ensure_ascii=False))
-    print(json.dumps(examples["type"], ensure_ascii=False))
+    # print("before new augment:")
+    # print(json.dumps(examples["clean_text"], ensure_ascii=False))
+    # print(json.dumps(examples["type"], ensure_ascii=False))
     empty_idx = []
     stategy_idx = []
     texts = []
