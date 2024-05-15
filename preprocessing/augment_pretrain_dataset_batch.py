@@ -36,7 +36,7 @@ def augment(contents):
             add_generation_prompt=True
         )
         texts.append(text)
-    model_inputs = tokenizer(texts, return_tensors="pt").to(device)
+    model_inputs = tokenizer(texts, padding=True, return_tensors="pt").to(device)
     try:
         generated_ids = model.generate(
             model_inputs.input_ids,
