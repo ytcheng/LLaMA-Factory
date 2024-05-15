@@ -52,8 +52,8 @@ def augment(contents):
         response = [''] * len(contents)
         # response = ""
     
-    torch.cuda.empty_cache()
     get_gpu_memory_usage()
+    torch.cuda.empty_cache()
     print("response:")
     print(response)
     return response
