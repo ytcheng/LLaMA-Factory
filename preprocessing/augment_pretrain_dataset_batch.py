@@ -128,17 +128,8 @@ def strategy_augment(example):
 
 # 处理新闻文章
 def news_augment(examples):
-    # print("before new augment:")
-    # print(json.dumps(examples["clean_text"], ensure_ascii=False))
-    # print(json.dumps(examples["type"], ensure_ascii=False))
-    empty_idx = []
-    stategy_idx = []
     texts = []
     for idx, clean_text in enumerate(examples["clean_text"]):
-        if len(clean_text) < 10 or examples["type"][idx] == 5:
-            empty_idx.append(idx)
-            continue
-        
         text = "标题:" + examples["title"][idx] + "\n\n" + clean_text
         texts.append(text)
     
@@ -147,39 +138,50 @@ def news_augment(examples):
     for augmented_content in augmented_contents:
         augmented_contents_array.append([augmented_content])
 
-    for idx in empty_idx:
-        augmented_contents_array.insert(idx, [])
    
     examples["augmented_contents"] = augmented_contents_array
     print("after new augment:")
     print(json.dumps(examples["augmented_contents"], ensure_ascii=False))
     return examples
 
-def news_stategy_augment(example):
-    if example["content"] == "" or example["type"] != 5:
-        example["augmented_contents"] = []
-        return example
-
-    times = 5
+def news_stategy_augment(examples):
     texts = []
-    augmented_contents = []
-    for i in range(times):
-        texts.append(example["clean_text"])
+    for idx, clean_text in enumerate(examples["clean_text"]):
+        for i in range(5):
+            text = "标题:" + examples["title"][idx] + "\n\n" + clean_text
+            texts.append(text)
     augmented_contents = augment(texts)
-    example["augmented_contents"] = augmented_contents
-    return example
 
-article_dataset = load_dataset("ytcheng/sm_news")
-# article_dataset = article_dataset.filter(lambda x: x["content"]!="").filter(lambda x: x["id"]>1391 and x["id"] < 1401)
+    augmented_contents_array = []
+    for idx in range(len(examples["clean_text"])):
+        augmented_contents_item_array = []
+        for i in range(5):
+            index = idx * (i + 1) + i
+            print("index:"+str(index))
+            augmented_contents_item_array.append(augmented_contents[index])
+        augmented_contents_array.append(augmented_contents_item_array)
+
+    examples["augmented_contents"] = augmented_contents_array
+    print("after new augment:")
+    print(json.dumps(examples["augmented_contents"], ensure_ascii=False))
+    return examples
+
+news_dataset = load_dataset("ytcheng/sm_news")
+news_dataset = news_dataset.map(lambda example: {"clean_text": remove_html_tags(example["content"])})
+news_dataset = news_dataset.filter(lambda x: len(x["clean_text"]) > 50)
+
+article_dataset = news_dataset.filter(lambda x: x["type"] != 5)
 # article_dataset = article_dataset['train'].select(range(10))
 # article_dataset = DatasetDict({"train":  article_dataset})
-# article_dataset = article_dataset['train'].select(range(40))
-# article_dataset = DatasetDict({"train":  article_dataset})
+article_dataset = article_dataset.map(news_augment, batched=True, batch_size=10)
+article_dataset.save_to_disk("data/news_article")
+article_dataset.push_to_hub("ytcheng/news_article")
 
-article_dataset = article_dataset.map(lambda example: {"clean_text": remove_html_tags(example["content"])})
-article_dataset = article_dataset.map(news_augment, batched=True, batch_size=20)
-article_dataset = article_dataset.map(news_stategy_augment)
-print(article_dataset)
-print(article_dataset["train"][0])
-article_dataset.save_to_disk("sm_news")
-article_dataset.push_to_hub("ytcheng/sm_news")
+news_stategy_dataset = news_dataset.filter(lambda x: x["type"] == 5)
+# news_stategy_dataset = news_stategy_dataset['train'].select(range(2))
+# news_stategy_dataset = DatasetDict({"train":  news_stategy_dataset})
+# print(news_stategy_dataset)
+news_stategy_dataset = news_stategy_dataset.map(news_stategy_augment, batched=True, batch_size=2)
+# print(news_stategy_dataset["train"][0])
+article_dataset.save_to_disk("data/news_stategy")
+article_dataset.push_to_hub("ytcheng/news_stategy")
