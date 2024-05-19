@@ -12,7 +12,7 @@ import json
 
 models = []
 device_count = torch.cuda.device_count()
-for rank in range(device_count)
+for rank in range(device_count):
     model = AutoModelForCausalLM.from_pretrained(
         "Qwen/Qwen1.5-32B-Chat-GPTQ-Int4",
         torch_dtype="auto",
