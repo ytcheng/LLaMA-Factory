@@ -16,7 +16,7 @@ for rank in range(device_count):
     model = AutoModelForCausalLM.from_pretrained(
         "Qwen/Qwen1.5-32B-Chat-GPTQ-Int4",
         torch_dtype="auto",
-        device_map={"": "cuda:{rank}"}
+        device_map={"": "cuda:"+str(rank)}
     )
     models.append(model)
 tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen1.5-32B-Chat-GPTQ-Int4", padding_side='left')
