@@ -442,7 +442,7 @@
     "folder": "python"
   },
   "sm_artile": {
-    "hf_hub_url": "ytcheng/sm_article",
+    "hf_hub_url": "ytcheng/sm_article_augmented",
     "columns":{
       "prompt":"text"
     }
