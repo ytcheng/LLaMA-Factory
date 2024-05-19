@@ -10,12 +10,15 @@ import json
 #     # count = count + 1
 #     return content
 
-
-model = AutoModelForCausalLM.from_pretrained(
-    "Qwen/Qwen1.5-32B-Chat-GPTQ-Int4",
-    torch_dtype="auto",
-    # device_map="auto"
-)
+models = []
+device_count = torch.cuda.device_count()
+for rank in range(device_count)
+    model = AutoModelForCausalLM.from_pretrained(
+        "Qwen/Qwen1.5-32B-Chat-GPTQ-Int4",
+        torch_dtype="auto",
+        device_map={"": "cuda:{rank}"}
+    )
+    models.append(model)
 tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen1.5-32B-Chat-GPTQ-Int4", padding_side='left')
 prompt = "用通顺流畅的语言重新表达下文内容。务必不要用类似\"xxx: xxxxxxx\"或”xxx: \n\" 这种句式。要覆盖原文的全部内容，不要遗漏。\n\n"
 # def augment(contents):
@@ -24,7 +27,8 @@ prompt = "用通顺流畅的语言重新表达下文内容。务必不要用类�
 #     return contents
 def augment(contents, rank):
     device = f"cuda:{(rank or 0) % torch.cuda.device_count()}"
-    model.to(device)
+    model = models[rank]
+    # model.to(device)
     # device = "cuda" # the device to load the model onto
     texts = []
     for content in contents:
