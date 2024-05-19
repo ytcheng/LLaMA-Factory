@@ -14,7 +14,7 @@ import json
 model = AutoModelForCausalLM.from_pretrained(
     "Qwen/Qwen1.5-32B-Chat-GPTQ-Int4",
     torch_dtype="auto",
-    device_map="auto"
+    # device_map="auto"
 )
 tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen1.5-32B-Chat-GPTQ-Int4", padding_side='left')
 prompt = "用通顺流畅的语言重新表达下文内容。务必不要用类似\"xxx: xxxxxxx\"或”xxx: \n\" 这种句式。要覆盖原文的全部内容，不要遗漏。\n\n"
@@ -22,8 +22,10 @@ prompt = "用通顺流畅的语言重新表达下文内容。务必不要用类�
 #     print("contents:")
 #     print(json.dumps(contents, ensure_ascii=False))
 #     return contents
-def augment(contents):
-    device = "cuda" # the device to load the model onto
+def augment(contents, rank):
+    device = f"cuda:{(rank or 0) % torch.cuda.device_count()}"
+    model.to(device)
+    # device = "cuda" # the device to load the model onto
     texts = []
     for content in contents:
         messages = [
@@ -83,27 +85,57 @@ def time_format(timestamp):
 
 
 # 处理论坛贴子
-def forum_augment(example):
-    if example["status"] != 1 or len(example["content"]) < 500:
-        example["augmented_contents"] = []
-        return example
+def forum_augment(examples, rank):
+    texts = []
+    for idx, clean_text in enumerate(examples["clean_text"]):
+        text = "标题:" + examples["title"][idx] + "\n\n" + clean_text
+        texts.append(text)
+    
+    augmented_contents = augment(texts, rank)
+    augmented_contents_array = []
+    for augmented_content in augmented_contents:
+        augmented_contents_array.append([augmented_content])
 
-    times = 1
-    if example["subtype"] == 5:
-        times = 5
-    augmented_contents = []
-    for i in range(times):
-        content = augment(example["clean_text"])
-        augmented_contents.append(content)
-    example["augmented_contents"] = augmented_contents
-    return example
+   
+    examples["augmented_contents"] = augmented_contents_array
+    print("after new augment:")
+    print(json.dumps(examples["augmented_contents"], ensure_ascii=False))
+    return examples
 
-# forum_dataset = load_dataset("ytcheng/sm_forum")
-# forum_dataset = forum_dataset.map(lambda example: {"clean_text": remove_html_tags(example["content"])})
-# forum_dataset = forum_dataset.map(forum_augment)
-# print(forum_dataset)
-# print(forum_dataset["train"][0])
-# forum_dataset.push_to_hub("ytcheng/sm_forum")
+def forum_stategy_augment(examples, rank):
+    texts = []
+    for idx, clean_text in enumerate(examples["clean_text"]):
+        for i in range(5):
+            text = "标题:" + examples["title"][idx] + "\n\n" + clean_text
+            texts.append(text)
+    augmented_contents = augment(texts, rank)
+
+    augmented_contents_array = []
+    for idx in range(len(examples["clean_text"])):
+        augmented_contents_item_array = []
+        for i in range(5):
+            index = idx * (i + 1) + i
+            print("index:"+str(index))
+            augmented_contents_item_array.append(augmented_contents[index])
+        augmented_contents_array.append(augmented_contents_item_array)
+
+    examples["augmented_contents"] = augmented_contents_array
+    print("after new augment:")
+    print(json.dumps(examples["augmented_contents"], ensure_ascii=False))
+    return examples
+
+forum_dataset = load_dataset("ytcheng/sm_forum")
+forum_dataset = forum_dataset.map(lambda example: {"clean_text": remove_html_tags(example["content"])})
+forum_dataset = forum_dataset.filter(lambda x: len(x["clean_text"]) > 300 and x["status"] == 1)
+
+forum_stategy_dataset = forum_dataset.filter(lambda x: x["subtype"] == 5)
+forum_stategy_dataset = forum_stategy_dataset.map(forum_stategy_augment, batched=True, batch_size=2, num_proc=torch.cuda.device_count())
+forum_stategy_dataset.push_to_hub("ytcheng/forum_stategy")
+
+forum_artile_dataset = forum_dataset.map(forum_augment, batched=True, batch_size=5, num_proc=torch.cuda.device_count())
+print(forum_artile_dataset)
+print(forum_artile_dataset["train"][0])
+forum_artile_dataset.push_to_hub("ytcheng/forum_article")
 
 
 # 处理攻略站文章
@@ -166,9 +198,9 @@ def news_stategy_augment(examples):
     print(json.dumps(examples["augmented_contents"], ensure_ascii=False))
     return examples
 
-news_dataset = load_dataset("ytcheng/sm_news")
-news_dataset = news_dataset.map(lambda example: {"clean_text": remove_html_tags(example["content"])})
-news_dataset = news_dataset.filter(lambda x: len(x["clean_text"]) > 50)
+# news_dataset = load_dataset("ytcheng/sm_news")
+# news_dataset = news_dataset.map(lambda example: {"clean_text": remove_html_tags(example["content"])})
+# news_dataset = news_dataset.filter(lambda x: len(x["clean_text"]) > 50)
 
 # article_dataset = news_dataset.filter(lambda x: x["type"] != 5)
 # article_dataset = article_dataset['train'].select(range(10))
@@ -177,11 +209,11 @@ news_dataset = news_dataset.filter(lambda x: len(x["clean_text"]) > 50)
 # article_dataset.save_to_disk("data/news_article")
 # article_dataset.push_to_hub("ytcheng/news_article")
 
-news_stategy_dataset = news_dataset.filter(lambda x: x["type"] == 5)
-# news_stategy_dataset = news_stategy_dataset['train'].select(range(2))
-# news_stategy_dataset = DatasetDict({"train":  news_stategy_dataset})
-# print(news_stategy_dataset)
-news_stategy_dataset = news_stategy_dataset.map(news_stategy_augment, batched=True, batch_size=2)
-# print(news_stategy_dataset["train"][0])
-news_stategy_dataset.save_to_disk("data/news_stategy")
-news_stategy_dataset.push_to_hub("ytcheng/news_stategy")
+# news_stategy_dataset = news_dataset.filter(lambda x: x["type"] == 5)
+# # news_stategy_dataset = news_stategy_dataset['train'].select(range(2))
+# # news_stategy_dataset = DatasetDict({"train":  news_stategy_dataset})
+# # print(news_stategy_dataset)
+# news_stategy_dataset = news_stategy_dataset.map(news_stategy_augment, batched=True, batch_size=2)
+# # print(news_stategy_dataset["train"][0])
+# news_stategy_dataset.save_to_disk("data/news_stategy")
+# news_stategy_dataset.push_to_hub("ytcheng/news_stategy")
