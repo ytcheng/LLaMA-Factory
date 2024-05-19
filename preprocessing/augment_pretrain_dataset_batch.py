@@ -27,7 +27,7 @@ prompt = "用通顺流畅的语言重新表达下文内容。务必不要用类�
 #     return contents
 def augment(contents, rank):
     device = f"cuda:{(rank or 0) % torch.cuda.device_count()}"
-    model = models[rank]
+    model = models[(rank or 0) % torch.cuda.device_count()]
     # model.to(device)
     # device = "cuda" # the device to load the model onto
     texts = []
