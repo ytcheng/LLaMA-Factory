@@ -131,8 +131,8 @@ forum_dataset = forum_dataset.filter(lambda x: len(x["clean_text"]) > 300 and x[
 forum_stategy_dataset = forum_dataset.filter(lambda x: x["subtype"] == 5)
 forum_stategy_dataset = forum_stategy_dataset.map(forum_stategy_augment, batched=True, batch_size=2, num_proc=torch.cuda.device_count())
 forum_stategy_dataset.push_to_hub("ytcheng/forum_stategy")
-
-forum_artile_dataset = forum_dataset.map(forum_augment, batched=True, batch_size=5, num_proc=torch.cuda.device_count())
+forum_artile_dataset = forum_dataset.filter(lambda x: x["subtype"] != 5)
+forum_artile_dataset = forum_artile_dataset.map(forum_augment, batched=True, batch_size=5, num_proc=torch.cuda.device_count())
 print(forum_artile_dataset)
 print(forum_artile_dataset["train"][0])
 forum_artile_dataset.push_to_hub("ytcheng/forum_article")
