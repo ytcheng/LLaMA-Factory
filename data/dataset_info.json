@@ -448,7 +448,7 @@
     }
   },
   "sm_question":{
-    "hf_hub_url": "ytcheng/sm_kf_chat_message",
+    "hf_hub_url": "ytcheng/sm_kf_chat_message_v2",
     "formatting": "sharegpt",
     "columns":{
       "messages":"messages"
