@@ -135,11 +135,11 @@ forum_dataset = forum_dataset.filter(lambda x: len(x["clean_text"]) > 300 and x[
 # forum_stategy_dataset = forum_dataset.filter(lambda x: x["subtype"] == 5)
 # forum_stategy_dataset = forum_stategy_dataset.map(forum_stategy_augment, batched=True, batch_size=2,with_rank=True, num_proc=torch.cuda.device_count())
 # forum_stategy_dataset.push_to_hub("ytcheng/forum_stategy")
-forum_artile_dataset = forum_dataset.filter(lambda x: x["subtype"] != 5)
-forum_artile_dataset = forum_artile_dataset.map(forum_augment, batched=True, batch_size=10, with_rank=True, num_proc=torch.cuda.device_count())
-print(forum_artile_dataset)
-print(forum_artile_dataset["train"][0])
-forum_artile_dataset.push_to_hub("ytcheng/forum_article")
+# forum_artile_dataset = forum_dataset.filter(lambda x: x["subtype"] != 5)
+# forum_artile_dataset = forum_artile_dataset.map(forum_augment, batched=True, batch_size=10, with_rank=True, num_proc=torch.cuda.device_count())
+# print(forum_artile_dataset)
+# print(forum_artile_dataset["train"][0])
+# forum_artile_dataset.push_to_hub("ytcheng/forum_article")
 
 
 # 处理攻略站文章
@@ -163,17 +163,25 @@ def strategy_augment(example):
 # strategy_dataset.push_to_hub("ytcheng/sm_strategy")
 
 # 处理新闻文章
-def news_augment(examples):
+def news_augment(examples, rank):
     texts = []
+    skip_idxs = []
     for idx, clean_text in enumerate(examples["clean_text"]):
+        if "augmented_contents" in examples and len(examples["augmented_contents"][idx]) > 0:
+            skip_idxs.append(idx)
+            continue
         text = "标题:" + examples["title"][idx] + "\n\n" + clean_text
         texts.append(text)
     
-    augmented_contents = augment(texts)
+    if len(texts) == 0:
+        return examples
+    augmented_contents = augment(texts, rank)
     augmented_contents_array = []
     for augmented_content in augmented_contents:
         augmented_contents_array.append([augmented_content])
 
+    for skip_idx in skip_idxs:
+        augmented_contents_array.insert(skip_idx, examples["augmented_contents"][skip_idx])
    
     examples["augmented_contents"] = augmented_contents_array
     print("after new augment:")
@@ -221,3 +229,8 @@ def news_stategy_augment(examples):
 # # print(news_stategy_dataset["train"][0])
 # news_stategy_dataset.save_to_disk("data/news_stategy")
 # news_stategy_dataset.push_to_hub("ytcheng/news_stategy")
+
+article_dataset = load_dataset("ytcheng/news_article")
+article_dataset = article_dataset.map(news_augment, batched=True, batch_size=5, with_rank=True, num_proc=torch.cuda.device_count())
+print(article_dataset)
+article_dataset.push_to_hub("ytcheng/news_article")
