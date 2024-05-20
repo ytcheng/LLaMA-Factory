@@ -1,0 +1,2 @@
+model_name_or_path: saves/llama3-70B/pretrain_merged_v2
+template: llama3
