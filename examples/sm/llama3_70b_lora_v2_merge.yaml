@@ -11,4 +11,4 @@ export_dir: saves/llama3-70B/pretrain_v2
 export_size: 5
 export_device: cpu
 export_legacy_format: false
-export_hub_model_id: ytcheng/llama-3-70B-pretrain_v2
+export_hub_model_id: ytcheng/llama3-70B-pretrain_v2
